@@ -68,7 +68,7 @@ local ops = {
 
 		['math.max'] = {Huge, function(x)return math.max(unpack(x)) end}, 
 		['math.random'] =  {Huge, function(x)return math.random(unpack(x))end}, 
-		
+
 		['-'] = {4, function(x) return -x end}, --artihmic unary
 
 	}
@@ -216,7 +216,7 @@ b : binary operation
 nil : other
 --]]
 
-function prec_climb.start(source, calc) --//start climb; calc == generate tree?
+function prec_climb.start(source, ast) --//start climb; ast == generate tree?
 
 	local peak
 	local flag = false
@@ -258,10 +258,10 @@ function prec_climb.start(source, calc) --//start climb; calc == generate tree?
 
 		elseif type == 'u' then
 
-			if calc then
-				tree = operation[2](exp(operation[1])) 
-			else
+			if ast then
 				tree = {next_token,exp(operation[1])}
+			else
+				tree = operation[2](exp(operation[1])) 
 			end
 
 			if  peak  then --// if next is binary
@@ -273,7 +273,7 @@ function prec_climb.start(source, calc) --//start climb; calc == generate tree?
 
 		elseif not type then
 			flag = true; 
-			return exp(p, calc and _tonumber(next_token) or {next_token})
+			return exp(p, ast and {next_token} or _tonumber(next_token))
 		end
 
 		while (flag and p <= operation[1]) do 
@@ -283,10 +283,10 @@ function prec_climb.start(source, calc) --//start climb; calc == generate tree?
 			local lower_token = next_token
 
 			if right_tree then --//expanded calc becuase possible flasely returns 
-				if calc then
-					tree = operation[2](tree, right_tree) 
-				else
+				if ast then
 					tree = {lower_token,tree, right_tree}
+				else
+					tree = operation[2](tree, right_tree) 
 				end
 			end
 
